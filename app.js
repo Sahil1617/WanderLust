@@ -4,8 +4,8 @@ if(process.env.NODE_ENV !== "production"){
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Mongo_URL = "mongodb://127.0.0.1:27017/wanderLust";
-// const dbURL = process.env.ATLASDB_URL
+// const Mongo_URL = "mongodb://127.0.0.1:27017/wanderLust";
+const dbURL = process.env.ATLASDB_URL
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
@@ -29,7 +29,7 @@ main()
 });
 
 async function main(){
-    await mongoose.connect(Mongo_URL);
+    await mongoose.connect(dbURL);
 }
 
 app.set("view engine", "ejs");
@@ -39,19 +39,20 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
-// const store = MongoStore.create({
-//     mongoUrl: dbURL,
-//     crypto: {
-//         secret:process.env.SECRET
-//     },
-//     touchAfter: 24*60*60,   
-// });
+const store = MongoStore.create({
+    mongoUrl: dbURL,
+    crypto: {
+        secret:process.env.SECRET
+    },
+    touchAfter: 24*60*60,   
+});
 
-// store.on("error", () =>{
-//     console.log("Session store error", err);
-// });
+store.on("error", () =>{
+    console.log("Session store error", err);
+});
 
 const sessionOptions ={
+    store,
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
